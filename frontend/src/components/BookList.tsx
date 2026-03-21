@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Book } from '../types/Book';
+import type { Book } from '../types/Book';
+
 
 function BookList() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -18,7 +19,8 @@ function BookList() {
       .then((data) => {
         setBooks(data.books);
         setTotalBooks(data.totalBooks);
-      });
+      })
+      .catch((error) => console.error('Error fetching books:', error));
   }, [pageNum, pageSize, sortOrder]);
 
   // Reset to page 1 when pageSize or sortOrder changes
@@ -95,13 +97,15 @@ function BookList() {
       <nav>
         <ul className="pagination">
           <li>
-            <button className="page-link" onClick={() => setPageNum(pageNum - 1)}>
+            <button
+              className="page-link"
+              onClick={() => setPageNum(pageNum - 1)}
+              disabled={pageNum === 1}
+            >
               Previous
             </button>
           </li>
           {[...Array(totalPages)].map((_, i) => (
-            
-              className={`page-item ${pageNum === i + 1 ? 'active' : ''}`}
             <li>
               <button className="page-link" onClick={() => setPageNum(i + 1)}>
                 {i + 1}
@@ -109,7 +113,11 @@ function BookList() {
             </li>
           ))}
           <li>
-            <button className="page-link" onClick={() => setPageNum(pageNum + 1)}>
+            <button
+              className="page-link"
+              onClick={() => setPageNum(pageNum + 1)}
+              disabled={pageNum === totalPages}
+            >
               Next
             </button>
           </li>
@@ -120,3 +128,4 @@ function BookList() {
 }
 
 export default BookList;
+
