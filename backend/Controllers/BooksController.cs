@@ -18,9 +18,15 @@ namespace Mission11Newman.Controllers
         public IActionResult GetBooks(
             int pageNum = 1,
             int pageSize = 5,
-            string sortOrder = "asc")
+            string sortOrder = "asc",
+            string? category = null)
         {
             var query = _context.Books.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                query = query.Where(b => b.Category == category);
+            }
 
             // Sorting by title
             if (sortOrder == "desc")
@@ -44,6 +50,18 @@ namespace Mission11Newman.Controllers
                 books,
                 totalBooks
             });
+        }
+
+        [HttpGet("categories")]
+        public IActionResult GetCategories()
+        {
+            var categories = _context.Books
+                .Select(b => b.Category)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
+            return Ok(categories);
         }
     }
 }

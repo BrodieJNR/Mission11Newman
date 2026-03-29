@@ -1,6 +1,0 @@
-@Mission11Newman_HostAddress = http://localhost:5179
-
-GET {{Mission11Newman_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
