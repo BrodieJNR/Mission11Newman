@@ -1,6 +1,6 @@
 PLEASE READ ENTIRE DOCUMENT TO MAKE GRADING EASIER AND QUICKER
 
-I added a task.json file so if you load up the whole repository in vscode and then you can just use the shortcut crtl + shift + B it will run the front and the backend at the same time in two different terminals so you don't have to. Thank you for all of your hard work!
+I added a task.json file so if you load up the whole repository in vscode and then you can just use the shortcut crtl + shift + B it will run the front and the backend at the same time in two different terminals so you don't have to aslo you may have to refresh the page once or twice the backend is sometimes slower (alhtough that may be a issue on my laptop). Thank you for all of your hard work!
 
 # Mission 12 - Bootstrap Features
 
