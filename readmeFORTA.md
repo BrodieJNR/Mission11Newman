@@ -1,4 +1,8 @@
+PLEASE READ
+
 # Mission 12 - Bootstrap Features
+
+sorry I didn't read the instructions all the way before I submitted and I thought that we were just supposed to add a comment in the code about the bootstrap stuff, If this works for that requirement great if not I also accept that. 
 
 ## Two Bootstrap Features Used (Not Covered in Class Videos)
 
