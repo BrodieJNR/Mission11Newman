@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Book } from '../types/Book';
 import { useCart } from '../context/CartContext';
+import { fetchBooks, fetchCategories } from '../API/booksApi';
+import Pagination from './Pagination';
 
 interface RestoredState {
   pageNum?: number;
@@ -15,27 +17,33 @@ function BookList() {
   const navigate = useNavigate();
   const { addToCart, cartCount, cartTotal } = useCart();
 
-  // Restore state if coming back from the cart via "Continue Shopping"
   const restored = location.state as RestoredState | null;
 
   const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [pageNum, setPageNum] = useState<number>(restored?.pageNum ?? 1);
   const [pageSize, setPageSize] = useState<number>(restored?.pageSize ?? 5);
-  const [totalBooks, setTotalBooks] = useState<number>(0);
-  const [sortOrder, setSortOrder] = useState<string>(restored?.sortOrder ?? 'asc');
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [sortOrder, setSortOrder] = useState<string>(
+    restored?.sortOrder ?? 'asc'
+  );
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(
     restored?.selectedCategory ?? ''
   );
 
-  const totalPages = Math.ceil(totalBooks / pageSize);
-
   // Fetch available categories once on mount
   useEffect(() => {
-    fetch('https://localhost:7294/api/books/categories')
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((error) => console.error('Error fetching categories:', error));
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
+    loadCategories();
   }, []);
 
   // Restore page state when navigating back from cart
@@ -50,18 +58,19 @@ function BookList() {
 
   // Fetch books whenever page/filter/sort changes
   useEffect(() => {
-    const categoryParam = selectedCategory
-      ? `&category=${encodeURIComponent(selectedCategory)}`
-      : '';
-    fetch(
-      `https://localhost:7294/api/books?pageNum=${pageNum}&pageSize=${pageSize}&sortOrder=${sortOrder}${categoryParam}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
+    const loadBooks = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchBooks(pageSize, pageNum, selectedCategory, sortOrder);
         setBooks(data.books);
-        setTotalBooks(data.totalBooks);
-      })
-      .catch((error) => console.error('Error fetching books:', error));
+        setTotalPages(Math.ceil(data.totalBooks / pageSize));
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBooks();
   }, [pageNum, pageSize, sortOrder, selectedCategory]);
 
   // Reset to page 1 when filters change
@@ -76,6 +85,9 @@ function BookList() {
       },
     });
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-danger">Error: {error}</p>;
 
   return (
     <div className="container mt-4">
@@ -123,7 +135,7 @@ function BookList() {
           </div>
         </div>
 
-        {/* Right column: Cart Summary Card (Bootstrap Card — new Bootstrap feature #1) */}
+        {/* Right column: Cart Summary Card (Bootstrap Card) */}
         <div className="col-md-4">
           <div className="card border-primary">
             <div className="card-header bg-primary text-white fw-bold">
@@ -132,7 +144,7 @@ function BookList() {
             <div className="card-body">
               <p className="card-text">
                 Items in cart:{' '}
-                {/* Bootstrap Badge — new Bootstrap feature #2 */}
+                {/* Bootstrap Badge */}
                 <span className="badge bg-primary">{cartCount}</span>
               </p>
               <p className="card-text">
@@ -194,50 +206,16 @@ function BookList() {
         </tbody>
       </table>
 
-      {/* Results per Page */}
-      <div className="mb-3">
-        <label className="me-2 fw-bold">Results per page:</label>
-        {[5, 10, 25].map((size) => (
-          <button
-            key={size}
-            className={`btn btn-sm me-2 ${pageSize === size ? 'btn-secondary' : 'btn-outline-secondary'}`}
-            onClick={() => setPageSize(size)}
-          >
-            {size}
-          </button>
-        ))}
-      </div>
-
-      {/* Pagination Controls */}
-      <nav>
-        <ul className="pagination">
-          <li className="page-item">
-            <button
-              className="page-link"
-              onClick={() => setPageNum(pageNum - 1)}
-              disabled={pageNum === 1}
-            >
-              Previous
-            </button>
-          </li>
-          {[...Array(totalPages)].map((_, i) => (
-            <li key={i} className={`page-item ${pageNum === i + 1 ? 'active' : ''}`}>
-              <button className="page-link" onClick={() => setPageNum(i + 1)}>
-                {i + 1}
-              </button>
-            </li>
-          ))}
-          <li className="page-item">
-            <button
-              className="page-link"
-              onClick={() => setPageNum(pageNum + 1)}
-              disabled={pageNum === totalPages}
-            >
-              Next
-            </button>
-          </li>
-        </ul>
-      </nav>
+      <Pagination
+        currentPage={pageNum}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageChange={setPageNum}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setPageNum(1);
+        }}
+      />
     </div>
   );
 }
