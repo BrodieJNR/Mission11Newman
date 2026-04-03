@@ -14,7 +14,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173",
+                           "https://zealous-coast-0a8b14b1e.6.azurestaticapps.net"
+        )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
