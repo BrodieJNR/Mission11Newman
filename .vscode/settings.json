@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/c7027fd6-18c2-4537-a2c2-ef804dd3fbcc/resourceGroups/appsvc_windows_francecentral/providers/Microsoft.Web/sites/Mission13-Newman-Backend",
+    "appService.deploySubpath": "backend\\publish"
+}
